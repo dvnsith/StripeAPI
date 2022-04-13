@@ -3,6 +3,7 @@
 import stripe
 from dotenv import dotenv_values
 import requests
+import time
 
 STRIPE_API = "https://api.stripe.com/v1/customers"
 config = dotenv_values(".env")
@@ -40,9 +41,10 @@ def getUser(nameInfo, emailInfo):
 
 
 def main():
-    print("WELCOME to the world's smallest online grocery store!")
-    name_info = input("What is your name?")
-    email_info = input("What is your email?")
+    print("\nWELCOME to the world's smallest online grocery store!\n")
+    time.sleep(3)
+    name_info = input("What is your name? ")
+    email_info = input("What is your email? ")
     description_info = f"{name_info} {email_info}"
     customer_id = ""
     # if email in list then get id else create new customer
@@ -54,9 +56,12 @@ def main():
             customer_id = getUser(name_info, email_info)
 
     total = 0
+    print("\n===================\nToday's Groceries\n===================")
+    time.sleep(3)
 
+    print('> Apple $8\n> Dog Food $50\n> Rice $20\n> Ribeye $40\n> Broccolini $6')
     shop = input(
-        '> Apple $8\n> Dog Food $50\n> Rice $20\n> Ribeye $40\n> Broccolini $6\nPlease choose your item(s): ').lower()
+        '===================\nPlease choose your item(s): ').lower()
 
     if("apple" in shop):
         total += groceries['apple']
