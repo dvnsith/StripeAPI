@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-""" Devin Sith | stripe API test """
+""" Devin Sith | A Grocery Application w/ StripeAPI """
 import os
 import stripe
 from dotenv import dotenv_values
