@@ -1,34 +1,35 @@
 #!/usr/bin/python3
 """ Devin Sith | stripe API test """
+import os
 import stripe
 from dotenv import dotenv_values
 import requests
 import time
+from datetime import date
 
-STRIPE_API = "https://api.stripe.com/v1/customers"
+STRIPE_API = "https://api.stripe.com/v1"
 config = dotenv_values(".env")
 # get secret key from dotenv file
-SK = config['SK']
+SECURITY_KEY = config['SK']
 # use to authenticate requests
-headers = {"Authorization": "Bearer " + SK}
+headers = {"Authorization": "Bearer " + SECURITY_KEY}
 # assign stripe api key
-stripe.api_key = SK
+stripe.api_key = SECURITY_KEY
 # test payment method card
 VISA = "pm_card_visa"
 
 groceries = {
     'apple': 8,
     'dog_food': 50,
-    'rice': 20,
+    'rice': 12,
     'ribeye': 40,
     'broccolini': 6
 }
 
+
 # search for customer then returns id
-
-
 def getUser(nameInfo, emailInfo):
-    req = requests.get(STRIPE_API, headers=headers)
+    req = requests.get(f"{STRIPE_API}/customers", headers=headers)
     res = req.json()
     result = ""
     for item in res['data']:
@@ -41,13 +42,17 @@ def getUser(nameInfo, emailInfo):
 
 
 def main():
-    print("\nWELCOME to the world's smallest online grocery store!\n")
+    os.system('cls||clear')
+    print("\nWELCOME to the WORLD'S SMALLEST online grocery store!\n")
     time.sleep(3)
-    name_info = input("What is your name? ")
-    email_info = input("What is your email? ")
-    description_info = f"{name_info} {email_info}"
+    name_info = input("What is your name?\n> ")
+    email_info = input("What is your email?\n> ")
+    description_info = input("What is your address?\n> ")
+    os.system('cls||clear')
+    print("\nWELCOME to the WORLD'S SMALLEST online grocery store!\n")
     customer_id = ""
     # if email in list then get id else create new customer
+    # else exit app if no input
     if(name_info != "" and email_info != ""):
         customer_id = getUser(name_info, email_info)
         if(customer_id == ""):
@@ -55,58 +60,62 @@ def main():
                                    email=email_info, name=name_info)
             customer_id = getUser(name_info, email_info)
 
-    total = 0
-    print("\n===================\nToday's Groceries\n===================")
-    time.sleep(3)
+        print(
+            f"\n=============================\nToday's Groceries {date.today()}\n=============================")
+        time.sleep(3)
 
-    print('> Apple $8\n> Dog Food $50\n> Rice $20\n> Ribeye $40\n> Broccolini $6')
-    shop = input(
-        '===================\nPlease choose your item(s): ').lower()
+        print('> Apples $8\n> Dog Food $50\n> Rice $12\n> Ribeye $40\n> Broccolini $6')
+        shop = input(
+            '=============================\nPlease choose your item(s):\n> ').lower()
 
-    if("apple" in shop):
-        total += groceries['apple']
+        total = 0
+        if("apple" in shop):
+            total += groceries['apple']
 
-    if("dog food" in shop):
-        total += groceries['dog_food']
+        if("dog food" in shop):
+            total += groceries['dog_food']
 
-    if("rice" in shop):
-        total += groceries['rice']
+        if("rice" in shop):
+            total += groceries['rice']
 
-    if("ribeye" in shop):
-        total += groceries['ribeye']
+        if("ribeye" in shop):
+            total += groceries['ribeye']
 
-    if("broccolini" in shop):
-        total += groceries['broccolini']
+        if("broccolini" in shop):
+            total += groceries['broccolini']
 
-    checkout = input(
-        f"Your total is ${total}.\nAre you ready to submit? ").lower()
-    # stripe's currency format is represented with two decimal places
-    # i.e 8 is 800, 10.50 is 1050
-    total = total * 100
+        checkout = input(
+            f"Your total is ${total}.\nAre you ready to submit?\n> ").lower()
+        # stripe's currency format is represented with two decimal places
+        # i.e 8 is 800, 10.50 is 1050
+        total = total * 100
 
-    if(checkout == 'yes' or checkout == 'y'):
-        # create payment transaction
-        stripe.PaymentIntent.create(
-            customer=customer_id,
-            currency="usd",
-            amount=total,
-            payment_method=VISA,  # Use Visa for test purpose
-            payment_method_types=["card"],
-            setup_future_usage="on_session",
-        )
+        if(checkout == 'yes' or checkout == 'y'):
+            # create payment transaction
+            stripe.PaymentIntent.create(
+                customer=customer_id,
+                currency="usd",
+                amount=total,
+                payment_method=VISA,  # Use Visa for test purpose
+                payment_method_types=["card"],
+                setup_future_usage="on_session",
+            )
 
-        # get payment_intents
-        get_payment_int = requests.get(
-            'https://api.stripe.com/v1/payment_intents', headers=headers).json()
-        # grab payment id
-        payment_id = get_payment_int["data"][0]['id']
-        # complete payment transaction
-        requests.post(
-            f"https://api.stripe.com/v1/payment_intents/{payment_id}/confirm", headers=headers)
+            # get payment_intents
+            get_payment_int = requests.get(
+                f"{STRIPE_API}/payment_intents", headers=headers).json()
+            # grab payment id
+            payment_id = get_payment_int["data"][0]['id']
+            # complete payment transaction
+            requests.post(
+                f"{STRIPE_API}/payment_intents/{payment_id}/confirm", headers=headers)
 
-        print("Thank you for shopping with us")
+            print("\nThank you for shopping with us\n")
+        else:
+            print("\nExiting checkout...\n")
+
     else:
-        print("Exiting checkout...")
+        print("\nPlease enter name and email...exiting app\n")
 
 
 if(__name__ == "__main__"):
