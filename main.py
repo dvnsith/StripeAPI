@@ -40,6 +40,7 @@ def getUser(nameInfo, emailInfo):
 
 
 def main():
+    print("WELCOME to the world's smallest online grocery store!")
     name_info = input("What is your name?")
     email_info = input("What is your email?")
     description_info = f"{name_info} {email_info}"
